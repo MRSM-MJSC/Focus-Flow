@@ -25,7 +25,7 @@
 
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 440px;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -40,6 +40,11 @@
       border-radius: 24px;
       padding: 24px;
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      overflow: hidden; /* Prevents inner elements from bleeding out */
     }
 
     /* Mode Selectors */
@@ -50,19 +55,21 @@
       background: rgba(0, 0, 0, 0.2);
       padding: 6px;
       border-radius: 16px;
+      width: 100%;
     }
 
     .mode-btn {
       flex: 1;
-      padding: 10px;
+      padding: 10px 4px;
       border: none;
       background: transparent;
       color: #94a3b8;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
     .mode-btn.active {
@@ -71,16 +78,48 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* Timer Display */
+    /* SVG Circular Progress Ring */
+    .timer-container {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0 24px 0;
+    }
+
+    .progress-ring {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-bg {
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-width: 8;
+    }
+
+    .progress-ring-circle {
+      stroke: #38bdf8;
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease-in-out, stroke 0.3s ease;
+      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
+    }
+
+    /* Timer Display Inside Ring */
     .timer-display {
+      position: relative;
+      z-index: 2;
       text-align: center;
-      margin: 20px 0;
     }
 
     .timer-time {
-      font-size: 5rem;
+      font-size: 3.5rem;
       font-weight: 700;
-      letter-spacing: -2px;
+      letter-spacing: -1px;
       color: #f8fafc;
       text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
     }
@@ -90,10 +129,13 @@
       display: flex;
       gap: 12px;
       justify-content: center;
+      width: 100%;
     }
 
     .btn {
-      padding: 14px 32px;
+      flex: 1;
+      max-width: 140px;
+      padding: 14px 0;
       border: none;
       border-radius: 16px;
       font-size: 1rem;
@@ -122,14 +164,79 @@
       background: rgba(255, 255, 255, 0.15);
     }
 
-    /* Custom Input Settings */
+    /* Auto-Start Toggle Switch */
+    .autostart-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .autostart-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #94a3b8;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+      background-color: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+
+    /* Custom Input Settings - Fixed Grid layout */
     .settings-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
-      margin-top: 20px;
-      padding-top: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
     }
 
     .setting-item {
@@ -137,6 +244,7 @@
       flex-direction: column;
       gap: 6px;
       text-align: center;
+      min-width: 0; /* Prevents overflow inside flex/grid items */
     }
 
     .setting-item label {
@@ -147,10 +255,11 @@
     }
 
     .setting-item input {
+      width: 100%;
       background: rgba(0, 0, 0, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
-      padding: 8px;
+      padding: 8px 4px;
       color: #fff;
       text-align: center;
       font-size: 1rem;
@@ -161,7 +270,6 @@
 <body>
 
   <div class="container">
-    <!-- Pomodoro Timer -->
     <div class="glass-card">
       <div class="modes">
         <button class="mode-btn active" onclick="switchMode('work', this)">Focus</button>
@@ -169,13 +277,30 @@
         <button class="mode-btn" onclick="switchMode('longBreak', this)">Long Break</button>
       </div>
 
-      <div class="timer-display">
-        <div class="timer-time" id="timer">25:00</div>
+      <!-- Circular SVG Progress Ring -->
+      <div class="timer-container">
+        <svg class="progress-ring" width="240" height="240">
+          <circle class="progress-ring-bg" cx="120" cy="120" r="105" fill="transparent" />
+          <circle id="progressCircle" class="progress-ring-circle" cx="120" cy="120" r="105" fill="transparent" />
+        </svg>
+
+        <div class="timer-display">
+          <div class="timer-time" id="timer">25:00</div>
+        </div>
       </div>
 
       <div class="controls">
         <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">Start</button>
         <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+      </div>
+
+      <!-- Auto-Start Switch -->
+      <div class="autostart-option">
+        <span class="autostart-label">Auto-start Next Session</span>
+        <label class="switch">
+          <input type="checkbox" id="autoStartToggle" checked>
+          <span class="slider"></span>
+        </label>
       </div>
 
       <div class="settings-grid">
@@ -196,9 +321,6 @@
   </div>
 
   <script>
-    /* =======================================
-       POMODORO TIMER LOGIC
-    ======================================= */
     let timerInterval = null;
     let currentMode = 'work';
     let isRunning = false;
@@ -211,6 +333,19 @@
     };
 
     let timeLeft = times.work;
+
+    // SVG Ring Setup
+    const circle = document.getElementById('progressCircle');
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = 0;
+
+    function setProgress(percent) {
+      const offset = circumference - (percent / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+    }
 
     function initAudio() {
       if (!audioCtx) {
@@ -229,43 +364,79 @@
       const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
       document.getElementById('timer').textContent = formattedTime;
       document.title = `${formattedTime} - Focus & Flow`;
+
+      const totalTime = times[currentMode];
+      const progressPercent = (timeLeft / totalTime) * 100;
+      setProgress(progressPercent);
     }
 
     function toggleTimer() {
       initAudio();
       if (isRunning) {
-        clearInterval(timerInterval);
-        document.getElementById('startBtn').textContent = 'Start';
+        pauseTimer();
       } else {
-        timerInterval = setInterval(() => {
-          if (timeLeft > 0) {
-            timeLeft--;
-            updateDisplay();
-          } else {
-            clearInterval(timerInterval);
-            isRunning = false;
-            document.getElementById('startBtn').textContent = 'Start';
-            playAlarm();
-          }
-        }, 1000);
-        document.getElementById('startBtn').textContent = 'Pause';
+        startTimer();
       }
-      isRunning = !isRunning;
     }
 
-    function resetTimer() {
+    function startTimer() {
+      isRunning = true;
+      document.getElementById('startBtn').textContent = 'Pause';
+      timerInterval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          updateDisplay();
+        } else {
+          handleSessionCompletion();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
       clearInterval(timerInterval);
       isRunning = false;
       document.getElementById('startBtn').textContent = 'Start';
+    }
+
+    function resetTimer() {
+      pauseTimer();
       timeLeft = times[currentMode];
       updateDisplay();
     }
 
     function switchMode(mode, btnElement) {
       currentMode = mode;
-      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-      btnElement.classList.add('active');
+      
+      const buttons = document.querySelectorAll('.mode-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      if (btnElement) {
+        btnElement.classList.add('active');
+      } else {
+        const modeIndex = { 'work': 0, 'shortBreak': 1, 'longBreak': 2 };
+        buttons[modeIndex[mode]].classList.add('active');
+      }
+
       resetTimer();
+    }
+
+    function handleSessionCompletion() {
+      clearInterval(timerInterval);
+      playAlarm();
+
+      const autoStart = document.getElementById('autoStartToggle').checked;
+
+      if (currentMode === 'work') {
+        currentMode = 'shortBreak';
+      } else {
+        currentMode = 'work';
+      }
+
+      switchMode(currentMode, null);
+
+      if (autoStart) {
+        startTimer();
+      }
     }
 
     function updateCustomTimes() {
@@ -281,17 +452,28 @@
 
     function playAlarm() {
       if (!audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.2); 
-      gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.9);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.9);
+      
+      const createBeep = (freq, startTime, duration) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
+        
+        gain.gain.setValueAtTime(0.3, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      };
+
+      const now = audioCtx.currentTime;
+      createBeep(587.33, now, 0.4);
+      createBeep(783.99, now + 0.5, 0.4);
+      createBeep(880.00, now + 1.0, 1.2);
     }
 
     updateDisplay();

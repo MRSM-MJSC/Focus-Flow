@@ -25,13 +25,13 @@
 
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 440px;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
-    /* Frosted Glass Base */
+    /* Frosted Glass Card */
     .glass-card {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(16px);
@@ -40,6 +40,7 @@
       border-radius: 24px;
       padding: 24px;
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      width: 100%;
     }
 
     /* Mode Selectors */
@@ -54,11 +55,11 @@
 
     .mode-btn {
       flex: 1;
-      padding: 10px;
+      padding: 10px 4px;
       border: none;
       background: transparent;
       color: #94a3b8;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       border-radius: 12px;
       cursor: pointer;
@@ -78,7 +79,7 @@
     }
 
     .timer-time {
-      font-size: 5rem;
+      font-size: 4.8rem;
       font-weight: 700;
       letter-spacing: -2px;
       color: #f8fafc;
@@ -93,10 +94,10 @@
     }
 
     .btn {
-      padding: 14px 32px;
+      padding: 12px 28px;
       border: none;
       border-radius: 16px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -122,38 +123,41 @@
       background: rgba(255, 255, 255, 0.15);
     }
 
-    /* Custom Input Settings */
+    /* Fixed Input Settings Grid */
     .settings-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      display: flex;
+      gap: 8px;
       margin-top: 20px;
       padding-top: 20px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
     }
 
     .setting-item {
+      flex: 1;
       display: flex;
       flex-direction: column;
       gap: 6px;
       text-align: center;
+      min-width: 0; /* Prevents overflow */
     }
 
     .setting-item label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #94a3b8;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .setting-item input {
+      width: 100%;
       background: rgba(0, 0, 0, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
-      padding: 8px;
+      padding: 8px 4px;
       color: #fff;
       text-align: center;
-      font-size: 1rem;
+      font-size: 0.95rem;
       outline: none;
     }
 
@@ -161,41 +165,41 @@
     .music-card {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
       position: relative;
-      overflow: hidden;
     }
 
     .album-art {
-      width: 60px;
-      height: 60px;
+      width: 56px;
+      height: 56px;
       border-radius: 12px;
       object-fit: cover;
       background: rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
     }
 
     .music-info {
       flex: 1;
-      overflow: hidden;
+      min-width: 0;
     }
 
     .music-status {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #1ed760;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       font-weight: 600;
       text-transform: uppercase;
     }
 
     .pulse-dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       background-color: #1ed760;
       border-radius: 50%;
-      box-shadow: 0 0 8px #1ed760;
+      box-shadow: 0 0 6px #1ed760;
       animation: pulse 2s infinite;
     }
 
@@ -206,7 +210,7 @@
     }
 
     .track-title {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
@@ -215,7 +219,7 @@
     }
 
     .track-artist {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #94a3b8;
       white-space: nowrap;
       overflow: hidden;
@@ -224,10 +228,10 @@
 
     .progress-bar-bg {
       width: 100%;
-      height: 4px;
+      height: 3px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 2px;
-      margin-top: 8px;
+      margin-top: 6px;
       overflow: hidden;
     }
 
@@ -238,15 +242,40 @@
       transition: width 0.5s ease;
     }
 
-    #authBtn {
-      display: none;
+    /* Control Buttons for Music */
+    .player-controls {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .player-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .player-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- Pomodoro Timer -->
+    <!-- Pomodoro Timer Card -->
     <div class="glass-card">
       <div class="modes">
         <button class="mode-btn active" onclick="switchMode('work', this)">Focus</button>
@@ -279,7 +308,7 @@
       </div>
     </div>
 
-    <!-- Live Music Card -->
+    <!-- Live Music Card with Quick Controls -->
     <div class="glass-card music-card" id="nowPlayingCard">
       <img id="trackArt" class="album-art" src="https://via.placeholder.com/60?text=♫" alt="Album Art">
       <div class="music-info">
@@ -293,12 +322,18 @@
           <div class="progress-bar-fill" id="progressFill"></div>
         </div>
       </div>
+
+      <!-- Quick Action Controls -->
+      <div class="player-controls">
+        <a href="spotify:" class="player-btn" title="Open Spotify / Pause">⏸</a>
+        <a href="spotify:" class="player-btn" title="Open Spotify App">⏭</a>
+      </div>
     </div>
   </div>
 
   <script>
     /* =======================================
-       LAST.FM LIVE MUSIC MONITOR (FREE & NO PREMIUM REQ)
+       LAST.FM LIVE MUSIC MONITOR
     ======================================= */
     const LASTFM_USERNAME = 'Waldannnnn';
     const LASTFM_API_KEY = '9be76fa1622c820a7e2a4dace90b6444';

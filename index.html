@@ -1,184 +1,477 @@
-<script>
-  /* =======================================
-     LAST.FM LIVE MUSIC MONITOR (FREE & NO PREMIUM REQ)
-  ======================================= */
-  const LASTFM_USERNAME = 'Waldannnnn'; // Your username from the previous screenshot
-  const LASTFM_API_KEY = '9be76fa1622c820a7e2a4dace90b6444';
-
-  async function fetchCurrentlyPlaying() {
-    if (LASTFM_USERNAME === 'YOUR_LASTFM_USERNAME' || LASTFM_API_KEY === 'YOUR_LASTFM_API_KEY') {
-      renderErrorState('Configuration needed (Username / API Key missing)');
-      return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus & Flow - Pomodoro Timer</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    const endpoint = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${LASTFM_USERNAME}&api_key=${LASTFM_API_KEY}&format=json&limit=1`;
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-    try {
-      const response = await fetch(endpoint);
-      const data = await response.json();
+    .container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-      if (data.error) {
-        renderErrorState(data.message || 'Last.fm API Error');
+    /* Frosted Glass Base */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    /* Mode Selectors */
+    .modes {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 6px;
+      border-radius: 16px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: #38bdf8;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Timer Display */
+    .timer-display {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .timer-time {
+      font-size: 5rem;
+      font-weight: 700;
+      letter-spacing: -2px;
+      color: #f8fafc;
+      text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+    }
+
+    /* Control Buttons */
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #38bdf8;
+      color: #0f172a;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: #7dd3fc;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Custom Input Settings */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .setting-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .setting-item label {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .setting-item input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px;
+      color: #fff;
+      text-align: center;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    /* Music Player Widget */
+    .music-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .album-art {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .music-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .music-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #1ed760;
+      margin-bottom: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #1ed760;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #1ed760;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    .track-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #f8fafc;
+    }
+
+    .track-artist {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: #1ed760;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    #authBtn {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Pomodoro Timer -->
+    <div class="glass-card">
+      <div class="modes">
+        <button class="mode-btn active" onclick="switchMode('work', this)">Focus</button>
+        <button class="mode-btn" onclick="switchMode('shortBreak', this)">Short Break</button>
+        <button class="mode-btn" onclick="switchMode('longBreak', this)">Long Break</button>
+      </div>
+
+      <div class="timer-display">
+        <div class="timer-time" id="timer">25:00</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">Start</button>
+        <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+      </div>
+
+      <div class="settings-grid">
+        <div class="setting-item">
+          <label>Focus</label>
+          <input type="number" id="workTime" value="25" min="1" onchange="updateCustomTimes()">
+        </div>
+        <div class="setting-item">
+          <label>Short</label>
+          <input type="number" id="shortBreakTime" value="5" min="1" onchange="updateCustomTimes()">
+        </div>
+        <div class="setting-item">
+          <label>Long</label>
+          <input type="number" id="longBreakTime" value="15" min="1" onchange="updateCustomTimes()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Music Card -->
+    <div class="glass-card music-card" id="nowPlayingCard">
+      <img id="trackArt" class="album-art" src="https://via.placeholder.com/60?text=♫" alt="Album Art">
+      <div class="music-info">
+        <div class="music-status" id="statusBadge">
+          <span class="pulse-dot"></span>
+          <span id="statusText">Syncing...</span>
+        </div>
+        <div class="track-title" id="trackTitle">Connecting Last.fm...</div>
+        <div class="track-artist" id="trackArtist">Please wait</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =======================================
+       LAST.FM LIVE MUSIC MONITOR (FREE & NO PREMIUM REQ)
+    ======================================= */
+    const LASTFM_USERNAME = 'Waldannnnn';
+    const LASTFM_API_KEY = '9be76fa1622c820a7e2a4dace90b6444';
+
+    async function fetchCurrentlyPlaying() {
+      if (LASTFM_USERNAME === 'YOUR_LASTFM_USERNAME' || LASTFM_API_KEY === 'YOUR_LASTFM_API_KEY') {
+        renderErrorState('Configuration needed (Username / API Key missing)');
         return;
       }
 
-      const tracks = data.recenttracks?.track;
-      if (!tracks || tracks.length === 0) {
-        renderOfflineState();
-        return;
-      }
+      const endpoint = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${LASTFM_USERNAME}&api_key=${LASTFM_API_KEY}&format=json&limit=1`;
 
-      const latestTrack = tracks[0];
-      const isNowPlaying = latestTrack['@attr'] && latestTrack['@attr'].nowplaying === 'true';
+      try {
+        const response = await fetch(endpoint);
+        const data = await response.json();
 
-      if (isNowPlaying) {
-        document.getElementById('trackTitle').textContent = latestTrack.name;
-        document.getElementById('trackArtist').textContent = latestTrack.artist['#text'];
-        
-        // Use album image or fallback placeholder
-        const albumArtUrl = latestTrack.image && latestTrack.image[2]['#text'] 
-          ? latestTrack.image[2]['#text'] 
-          : 'https://via.placeholder.com/60?text=♫';
-          
-        document.getElementById('trackArt').src = albumArtUrl;
-
-        // UI active indicators
-        document.getElementById('statusBadge').style.color = '#1ed760';
-        document.getElementById('statusText').textContent = 'Live on Device (Last.fm)';
-        document.querySelector('.pulse-dot').style.display = 'inline-block';
-        document.getElementById('progressFill').style.width = '100%'; // Continuous bar state
-      } else {
-        renderOfflineState();
-      }
-    } catch (err) {
-      console.error('Last.fm fetch error:', err);
-      renderErrorState('Network Error');
-    }
-  }
-
-  function renderOfflineState() {
-    document.getElementById('trackTitle').textContent = 'Paused / Idle';
-    document.getElementById('trackArtist').textContent = 'Play music on your Spotify app';
-    document.getElementById('trackArt').src = 'https://via.placeholder.com/60?text=♫';
-    document.getElementById('progressFill').style.width = '0%';
-    document.getElementById('statusText').textContent = 'Offline';
-    document.getElementById('statusBadge').style.color = '#94a3b8';
-    document.querySelector('.pulse-dot').style.display = 'none';
-  }
-
-  function renderErrorState(msg) {
-    document.getElementById('trackTitle').textContent = 'Setup Required';
-    document.getElementById('trackArtist').textContent = msg;
-    document.getElementById('statusText').textContent = 'Error';
-    document.getElementById('statusBadge').style.color = '#ef4444';
-    document.querySelector('.pulse-dot').style.display = 'none';
-  }
-
-  // Hide the old login button since Last.fm works publicly without user log in
-  document.getElementById('authBtn').style.display = 'none';
-  document.getElementById('nowPlayingCard').style.display = 'flex';
-
-  // Check every 5 seconds
-  fetchCurrentlyPlaying();
-  setInterval(fetchCurrentlyPlaying, 5000);
-
-  /* =======================================
-     POMODORO TIMER LOGIC
-  ======================================= */
-  let timerInterval = null;
-  let currentMode = 'work';
-  let isRunning = false;
-  let audioCtx = null;
-
-  const times = {
-    work: 25 * 60,
-    shortBreak: 5 * 60,
-    longBreak: 15 * 60
-  };
-
-  let timeLeft = times.work;
-
-  function initAudio() {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-  }
-
-  window.addEventListener('click', () => { initAudio(); }, { once: true });
-
-  function updateDisplay() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    document.getElementById('timer').textContent = formattedTime;
-    document.title = `${formattedTime} - Focus & Flow`;
-  }
-
-  function toggleTimer() {
-    initAudio();
-    if (isRunning) {
-      clearInterval(timerInterval);
-      document.getElementById('startBtn').textContent = 'Start';
-    } else {
-      timerInterval = setInterval(() => {
-        if (timeLeft > 0) {
-          timeLeft--;
-          updateDisplay();
-        } else {
-          clearInterval(timerInterval);
-          isRunning = false;
-          document.getElementById('startBtn').textContent = 'Start';
-          playAlarm();
+        if (data.error) {
+          renderErrorState(data.message || 'Last.fm API Error');
+          return;
         }
-      }, 1000);
-      document.getElementById('startBtn').textContent = 'Pause';
+
+        const tracks = data.recenttracks?.track;
+        if (!tracks || tracks.length === 0) {
+          renderOfflineState();
+          return;
+        }
+
+        const latestTrack = tracks[0];
+        const isNowPlaying = latestTrack['@attr'] && latestTrack['@attr'].nowplaying === 'true';
+
+        if (isNowPlaying) {
+          document.getElementById('trackTitle').textContent = latestTrack.name;
+          document.getElementById('trackArtist').textContent = latestTrack.artist['#text'];
+          
+          const albumArtUrl = latestTrack.image && latestTrack.image[2]['#text'] 
+            ? latestTrack.image[2]['#text'] 
+            : 'https://via.placeholder.com/60?text=♫';
+            
+          document.getElementById('trackArt').src = albumArtUrl;
+
+          document.getElementById('statusBadge').style.color = '#1ed760';
+          document.getElementById('statusText').textContent = 'Live on Device (Last.fm)';
+          document.querySelector('.pulse-dot').style.display = 'inline-block';
+          document.getElementById('progressFill').style.width = '100%';
+        } else {
+          renderOfflineState();
+        }
+      } catch (err) {
+        console.error('Last.fm fetch error:', err);
+        renderErrorState('Network Error');
+      }
     }
-    isRunning = !isRunning;
-  }
 
-  function resetTimer() {
-    clearInterval(timerInterval);
-    isRunning = false;
-    document.getElementById('startBtn').textContent = 'Start';
-    timeLeft = times[currentMode];
-    updateDisplay();
-  }
+    function renderOfflineState() {
+      document.getElementById('trackTitle').textContent = 'Paused / Idle';
+      document.getElementById('trackArtist').textContent = 'Play music on your Spotify app';
+      document.getElementById('trackArt').src = 'https://via.placeholder.com/60?text=♫';
+      document.getElementById('progressFill').style.width = '0%';
+      document.getElementById('statusText').textContent = 'Offline';
+      document.getElementById('statusBadge').style.color = '#94a3b8';
+      document.querySelector('.pulse-dot').style.display = 'none';
+    }
 
-  function switchMode(mode, btnElement) {
-    currentMode = mode;
-    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-    btnElement.classList.add('active');
-    resetTimer();
-  }
+    function renderErrorState(msg) {
+      document.getElementById('trackTitle').textContent = 'Setup Required';
+      document.getElementById('trackArtist').textContent = msg;
+      document.getElementById('statusText').textContent = 'Error';
+      document.getElementById('statusBadge').style.color = '#ef4444';
+      document.querySelector('.pulse-dot').style.display = 'none';
+    }
 
-  function updateCustomTimes() {
-    times.work = Math.max(1, parseInt(document.getElementById('workTime').value) || 25) * 60;
-    times.shortBreak = Math.max(1, parseInt(document.getElementById('shortBreakTime').value) || 5) * 60;
-    times.longBreak = Math.max(1, parseInt(document.getElementById('longBreakTime').value) || 15) * 60;
-    
-    if (!isRunning) {
+    fetchCurrentlyPlaying();
+    setInterval(fetchCurrentlyPlaying, 5000);
+
+    /* =======================================
+       POMODORO TIMER LOGIC
+    ======================================= */
+    let timerInterval = null;
+    let currentMode = 'work';
+    let isRunning = false;
+    let audioCtx = null;
+
+    const times = {
+      work: 25 * 60,
+      shortBreak: 5 * 60,
+      longBreak: 15 * 60
+    };
+
+    let timeLeft = times.work;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    window.addEventListener('click', () => { initAudio(); }, { once: true });
+
+    function updateDisplay() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      document.getElementById('timer').textContent = formattedTime;
+      document.title = `${formattedTime} - Focus & Flow`;
+    }
+
+    function toggleTimer() {
+      initAudio();
+      if (isRunning) {
+        clearInterval(timerInterval);
+        document.getElementById('startBtn').textContent = 'Start';
+      } else {
+        timerInterval = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateDisplay();
+          } else {
+            clearInterval(timerInterval);
+            isRunning = false;
+            document.getElementById('startBtn').textContent = 'Start';
+            playAlarm();
+          }
+        }, 1000);
+        document.getElementById('startBtn').textContent = 'Pause';
+      }
+      isRunning = !isRunning;
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      document.getElementById('startBtn').textContent = 'Start';
       timeLeft = times[currentMode];
       updateDisplay();
     }
-  }
 
-  function playAlarm() {
-    if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
-    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.2); 
-    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.9);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.9);
-  }
+    function switchMode(mode, btnElement) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+      btnElement.classList.add('active');
+      resetTimer();
+    }
 
-  updateDisplay();
-</script>
+    function updateCustomTimes() {
+      times.work = Math.max(1, parseInt(document.getElementById('workTime').value) || 25) * 60;
+      times.shortBreak = Math.max(1, parseInt(document.getElementById('shortBreakTime').value) || 5) * 60;
+      times.longBreak = Math.max(1, parseInt(document.getElementById('longBreakTime').value) || 15) * 60;
+      
+      if (!isRunning) {
+        timeLeft = times[currentMode];
+        updateDisplay();
+      }
+    }
+
+    function playAlarm() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.2); 
+      gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.9);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.9);
+    }
+
+    updateDisplay();
+  </script>
+</body>
+</html>
